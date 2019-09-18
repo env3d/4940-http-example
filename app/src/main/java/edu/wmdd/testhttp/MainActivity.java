@@ -1,8 +1,14 @@
 package edu.wmdd.testhttp;
 
+import android.database.DataSetObserver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,9 +47,10 @@ public class MainActivity extends AppCompatActivity {
             // Here we instantiate the OkHttpClient and
             // GET the appropriate .json content from reddit frontpage
             OkHttpClient client = new OkHttpClient();
-            String url;
-            url = "https://www.reddit.com/.json";
-            Request req = new Request.Builder().url(url).build();
+
+            String url = "https://www.reddit.com/.json";
+            Request req = new Request.Builder().addHeader("user-agent", "asdf").url(url).build();
+
 
             // We can't use blocking network calls in the UI thread,
             // so we need to create a new thread to handle the
@@ -74,8 +81,14 @@ public class MainActivity extends AppCompatActivity {
                         // We can't update UI on a different thread, so we need to send
                         // the processing back to the UI thread via runOnUiThread method
                         runOnUiThread(()->{
+
                             String result = titles.stream().reduce("", (a, b) -> a += "\n" + b);
-                            ((TextView)findViewById(R.id.textView)).setText(result);
+                            ListView v = findViewById(R.id.list_view);
+                            ArrayAdapter<String> data = new ArrayAdapter<String>(MainActivity.this, R.layout.list_item_layout, R.id.textView, titles.toArray(new String[]{}));
+
+                            v.setAdapter(data);
+                            Log.d("TAG", result);
+
                         });
                     } catch (IOException | JSONException e) {
                         runOnUiThread(()->{
